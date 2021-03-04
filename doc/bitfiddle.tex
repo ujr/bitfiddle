@@ -1,0 +1,204 @@
+% The Science of the Bit Fiddle
+% Assumes the dvipdfm processor
+% ujr/2020-12-13
+
+\input epsf
+\input fonts
+
+\ifx\pdfoutput\undefined\csname newcount\endcsname\pdfoutput\fi
+\ifcase\pdfoutput\def\pdfinfo#1{\special{pdf:docinfo<<#1>>}}\fi
+\pdfinfo{ /Author (Urs-Jakob R^^fcetschi)
+ /Title (The Science of the Bit Fiddle)
+ /Subject (Analysis of Rob Miles's Bitshift Variations in C Minor) }
+
+\parindent=0pt
+\parskip=0pt
+\vsize=25.5 truecm
+\hsize=13.0 truecm
+\advance\hoffset by .5truecm
+\font\tf=cmssbx12 scaled\magstep2 % title font
+\font\bs=cmssbx10 % bold sans
+\nopagenumbers
+\def\newline{\hfil\break}\let\\=\newline
+\catcode`\|\active\def|{\kern3pt}%
+
+\newbox\sidebox
+\setbox\sidebox=\vtop{\hsize=3cm\smallskip
+\halign{\hskip3pt\hfil\rm#&\quad#&\hfil\tt#\cr
+\omit\hfil\it\ dec\hfil&&\omit\hfil\it binary\hfil\cr
+ 0&& 0000|0000\cr
+ 1&& 0000|0001\cr
+ 2&& 0000|0010\cr
+ 3&& 0000|0011\cr
+ 4&& 0000|0100\cr
+ 5&& 0000|0101\cr
+ 6&& 0000|0110\cr
+ 7&& 0000|0111\cr
+\noalign{\smallskip}
+ 8&& 0000|1000\cr
+ 9&& 0000|1001\cr
+10&& 0000|1010\cr
+11&& 0000|1011\cr
+12&& 0000|1100\cr
+13&& 0000|1101\cr
+14&& 0000|1110\cr
+15&& 0000|1111\cr
+\noalign{\smallskip}
+16&& 0001|0000\cr
+17&& 0001|0001\cr
+18&& 0001|0010\cr
+19&& 0001|0011\cr
+20&& 0001|0100\cr
+21&& 0001|0101\cr
+22&& 0001|0110\cr
+23&& 0001|0111\cr
+\noalign{\smallskip}
+24&& 0001|1000\cr
+25&& 0001|1001\cr
+26&& 0001|1010\cr
+27&& 0001|1011\cr
+28&& 0001|1100\cr
+29&& 0001|1101\cr
+30&& 0001|1110\cr
+31&& 0001|1111\cr
+%\noalign{\smallskip}
+%32&& 0010|0000\cr
+%33&& 0010|0001\cr
+%34&& 0010|0010\cr
+%35&& 0010|0011\cr
+%36&& 0010|0100\cr
+%37&& 0010|0101\cr
+%38&& 0010|0110\cr
+%39&& 0010|0111\cr
+%\noalign{\smallskip}
+%40&& 0010|1000\cr
+%41&& 0010|1001\cr
+%42&& 0010|1010\cr
+%43&& 0010|1011\cr
+%44&& 0010|1100\cr
+%45&& 0010|1101\cr
+%46&& 0010|1110\cr
+%47&& 0010|1111\cr
+%\noalign{\smallskip}
+%48&& 0011|0000\cr
+%49&& 0011|0001\cr
+%50&& 0011|0010\cr
+%51&& 0011|0011\cr
+\noalign{\medskip}
+ 63&& 0011|1111\cr
+127&& 0111|1111\cr
+255&& 1111|1111\cr
+}
+\bigskip\hrule
+\bigskip\hsize=2.6cm
+\centerline{\it Timing Divisors}
+\centerline{\it at 8192\kern.5ex Hz}
+\smallskip
+{\tt i>>10} $\equiv$ {\tt i}/1024\newline
+\centerline{8 times per sec}
+\smallskip
+{\tt i>>11} $\equiv$ {\tt i}/2048\newline
+\centerline{4 times per sec}
+\smallskip
+{\tt i>>12} $\equiv$ {\tt i}/4096\newline
+\centerline{2 times per sec}
+\smallskip
+{\tt i>>13} $\equiv$ {\tt i}/8192\newline
+\centerline{once per sec}
+\smallskip
+{\tt i>>14} $\equiv$ {\tt i}/16384\newline
+\centerline{two seconds}
+\smallskip
+{\tt i>>17} $\equiv$ {\tt i}/\rlap{131072}\newline
+\centerline{16 seconds}
+\vskip7pt\hrule
+\medskip
+\centerline{U.\kern.5ex J.\kern.5ex R\"uetschi}
+\line{\hss 2020 $\cdot$ CC-\kern-.1ex BY\kern-.3ex-SA\hss}
+\vskip4pt\hrule
+}
+
+\leftline{\tf The Science of the Bit Fiddle%
+\vadjust{\vbox to 0pt{\moveright\hsize\rlap{\hskip6pt
+ \vrule\hskip3pt\box\sidebox}\vss}}}
+
+\bigskip\noindent
+Notes and tables to accompany an analysis of\newline
+{\bs Rob Miles}'s 2016 {\bs Bitshift Variations in C Minor}
+\smallskip\noindent
+Original code: http://txti.es/bitshiftvariationsincminor\newline
+Intro movie: https://www.youtube.com/watch?v=MqZgoNRERY8\newline
+Recording: https://soundcloud.com/robertskmiles/bitshift-variations-in-c-minor
+
+\medskip
+\line{\hrulefill\bs\quad Basics\quad\hrulefill}
+\halign{#\hfil&\quad\hfil\tt#&\qquad#\hfil&\quad\hfil\tt#&\qquad#\hfil\cr
+Masking& i|=|xxxx|xxxx&Shifting&i=22|=|0001|0110&shifting {\tt<<} and {\tt>>}\cr
+       &\llap{mask}|=|0001|1111&&i<<2|=|0101|1000&binds tighter than\cr
+       &\llap{mask}\&i|=|000x|xxxx&&i>>2|=|0000|0101&masking {\tt\&}\cr}
+
+\medskip
+\line{\hrulefill\bs\quad Sawtooth Sound\quad\hrulefill}
+\medskip
+\line{\hfil\epsfbox{bitfiddle-1.mps}\hfil
+ \epsfbox{bitfiddle-2.mps}\hfil\epsfbox{bitfiddle-3.mps}\hfil}
+\medskip
+\line{\hfil\epsfbox{bitfiddle-4.mps}\hfil
+ \epsfbox{bitfiddle-5.mps}\hfil\epsfbox{bitfiddle-6.mps}\hfil}
+\medskip
+\centerline{\epsfbox{bitfiddle-7.mps}} % sound generator
+\centerline{Sound generator:
+ $i$ = clock, $n$ = pitch indicator, $o$ = octave, $4$ = volume}
+
+\medskip
+\line{\hrulefill\bs\quad Just Intonation\quad\hrulefill}
+\halign to\hsize{\tabskip=1pc plus 1ex minus .5ex
+  \hfil#&\hfil#\hfil&\hfil#\hfil&\hfil#\hfil&\hfil#\hfil&\hfil
+  #\hfil&\hfil#\hfil&\hfil#\hfil&\hfil#\hfil\cr
+ char:&\tt'\%'&\tt'6'&\tt'B'&\tt'Q'&\tt'Y'&\tt'j'&\tt'\char"7D'\cr
+ASCII:& 37&  54&  66&  81&  89& 106& 125\cr
+  +51:& 88& 105& 117& 132& 140& 157& 176\cr
+ratio:& $1$ &$1.19$&$1.32$&$1.50$&$1.59$&$1.78$&$2$& the ratios of\cr
+      &$1/1$&$6/5$&$4/3$&$3/2$&$8/5$&$16/9$&$2/1$& just intonation\cr
+ note:& C & E$\flat$ & F& G& A$\flat$& B$\flat$& C$'$& C minor\cr}
+
+\smallskip
+\line{\hrulefill\bs\quad Melodies\quad\hrulefill}
+\smallskip\noindent
+Assume playback at 8192 Hz (close to the actual 8000 Hz
+but gives nice figures).
+The expression {\tt 3\&(i>>16)} chooses between two sets of notes.
+It yields the repeating sequence 0 1 2 3 and progresses every $2^{16}$
+increments of $i$ or about every 8 seconds.
+\smallskip
+\halign{\tabskip=1.5ex\hfil#&\tt#\hfil&#\hfil&#\hfil\cr
+1.&BY\char"7D\relax6YB6\%&
+ corresponding to F A$\flat$ C$'$ E$\flat$ A$\flat$ F E$\flat$ C&
+ for {\tt 3\&(i>>16)} in $1,2,3$\cr
+2.&Qj\char"7D\relax6jQ6\%&
+ corresponding to G B$\flat$ C$'$ E$\flat$ B$\flat$ G E$\flat$ C&
+ for {\tt 3\&(i>>16)} $=0$\cr}
+\smallskip
+\noindent{\bf First voice:} controlled by ${\tt n}={\tt i}/2^{14}$,
+which increments every 2 seconds. The current set of notes
+is indexed by {\tt n\%8}, so we get the 1st half of set~2,
+the 2nd half of set~1, then the entire set~1, before the
+melody repeats. Period is thus 32 seconds.
+\vskip6mm
+\line{\special{pdf:epdf width 13.5cm (voice1.pdf)}\hss}
+\noindent{\bf Voices 2, 3, 4:} left as an exercise...
+
+\smallskip
+\line{\hrulefill\bs\quad Outlook\quad\hrulefill}
+\smallskip\noindent
+Omitted here: remaining voices, voice on/off, harmonies, period length.
+Terseness: exploiting operator precedence, type defaults (int),
+arguments to main are really just local variables defined using
+as little code as possible.
+How was it invented? By genius!
+But remember the law of downhill synthesis and uphill analysis
+(V.~Braitenberg in his 1986 book {\sl Vehicles\/}).
+I found this a {\it fun\/} analysis of a {\it fascinating\/} synthesis.
+\smallskip\hrule
+
+\bye
