@@ -9,8 +9,8 @@
 \paper { indent = 0 print-page-number = ##f left-margin = 0 }
 \header { tagline = ##f }
 
-melodyOne = \fixed g' {
-  \clef "treble" \key c \minor \time 4/4
+melodyOne = \fixed g, {
+  \clef "bass" \key c \minor \time 4/4
   \repeat volta 2 {
     g1   | bes | c'  | ees \bar "."
     aes1 | f   | ees | c   \bar "||"
