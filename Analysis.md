@@ -311,7 +311,9 @@ Now it is simple to see that `n` increments every 2<sup>14</sup>=16384
 steps of `i` or about every 2 seconds. Similarly, `s` increments every
 2<sup>17</sup>=131072 steps of `i` or about every 16 seconds.
 
-The **first voice** is controlled by `n`, which increments every
+### First Voice
+
+The first voice is controlled by `n`, which increments every
 2 seconds. Within the `g` function, the current set of notes is
 indexed by `n%8`, so that we get the 1st half of the 2nd set,
 the 2nd half of the 1st set, then the entire 1st set, before
@@ -319,12 +321,19 @@ the melody repeats:
 
 ```text
 seq%8:  |: 0 1  2  3  : 4  5 6  7 : 0 1  2  3  : 4  5 6  7 :|
-notes:  |: G Bb C' Eb : Ab F Eb C : F Ab C' Eb : Ab F Eb C :|  (32 secs)
+  set:     ----2nd---   ---1st---   ---1st----   ---1st---
+notes:  |: G Bb C' Eb : Ab F Eb C : F Ab C' Eb : Ab F Eb C :|  (32")
 ```
 
-It is the base line and repeats every 32 seconds.
+![First Voice](doc/voice1.png)
 
-The **second voice** is controlled by `n^(i>>13)`, which changes
+It is the base line and repeats every **32 seconds**.
+The heavy bar line marks the change between the two
+note sets.
+
+### Second Voice
+
+The second voice is controlled by `n^(i>>13)`, which changes
 once every second (2<sup>13</sup>=8192). It is in half notes
 relative to the first voice and it starts only after 16 seconds,
 when `s` first changes from 0 to 1. What melody does it produce?
@@ -335,77 +344,119 @@ the xor of a value and twice that value, essentially `a^b` where
 representations for small values of *a*, *b*, and *a^b* we find:
 
 ```text
-    a=b/2  b=2a   a^b    dec.
+    a=b/2  b=2a   a^b    dec.  mod 8
 
-    0000   0000   0000     0
-    0000   0001   0001     1
-    0001   0010   0011     3
-    0001   0011   0010     2
+    0000   0000   0000     0     0
+    0000   0001   0001     1     1
+    0001   0010   0011     3     3
+    0001   0011   0010     2     2
 
-    0010   0100   0110     6
-    0010   0101   0111     7
-    0011   0110   0101     5
-    0011   0111   0100     4
+    0010   0100   0110     6     6
+    0010   0101   0111     7     7
+    0011   0110   0101     5     5
+    0011   0111   0100     4     4
 
-    0100   1000   1100    12
-    0100   1001   1101    13
-    0101   1010   1111    15
-    0101   1011   1110    14
+    0100   1000   1100    12     4
+    0100   1001   1101    13     5
+    0101   1010   1111    15     7
+    0101   1011   1110    14     6
 
-    0110   1100   1010    10
-    0110   1101   1011    11
-    0111   1110   1001     9
-    0111   1111   1000     8
+    0110   1100   1010    10     2
+    0110   1101   1011    11     3
+    0111   1110   1001     9     1
+    0111   1111   1000     8     0
 ```
 
 (It turns out that this is a [Gray code][graycode],
 which has the property that exactly one bit changes
 between successive numbers in binary representation.)
 
-The generated melody in half notes (relative to the first voice) is:
+Remember that the “magic strings” are indexed by `[t%8]`,
+so only the least significant 3 bits of the Gray code
+are used, and this bit sequence is an endless repetition
+of the “mod 8” column above.
+
+Since each note lasts one second, the first eight notes
+are pulled from the 2nd set, the following 24 notes are
+pulled from the 1st set. The generated melody, in halves
+(relative to the first voice) is as shown below and has
+a period of **32 seconds**. Again, the heavy bar line
+marks the change between the note sets.
 
 ```text
 seq%8:  |: 0  1  3  2  6  7  5  4  : 4  5  7  6  2  3  1  0 :|
 notes:  |: G  Bb Eb C' Eb C  G  Bb : Ab F  C  Eb C' Eb Ab F :
-           F  Ab Eb C' Eb C  F  Ab : Ab F  C  Eb C' Eb Ab F :|  (32 secs)
+           F  Ab Eb C' Eb C  F  Ab : Ab F  C  Eb C' Eb Ab F :|  (32")
 ```
 
-The **third voice** is controlled by `n+((i>>11)%3)`, which changes
-about 4 times a second, so it is in eighth relative to the first voice.
-It starts after about 48 seconds, when *s/3* first changes from 0 to 1.
+![Second Voice](doc/voice2.png)
 
-The expression `(i>>11)%3` generates the repeating sequence 0, 1, 2, 3
-four times per second (`i>>11` &equiv; `i/2048`). To this the value of `n`
-(which increments every 2 seconds) is added, so we get this sequence:
+[graycode]: https://en.wikipedia.org/wiki/Gray_code
+
+### Third Voice
+
+The third voice is controlled by `n+((i>>11)%3)`, which changes
+about 4 times a second (`i>>11` ≡ `i/2048`), so it is in eighth
+relative to the first voice. It starts after about 48 seconds,
+when *s/3* first changes from 0 to 1.
+
+The expression `(i>>11)%3` generates the repeating sequence 0, 1, 2.
+To this the value of `n` (which increments every 2 seconds) is added.
+The period of `n+((i>>11)%3)` (mod 8) is the least common multiple
+of 3 (the repeating 0 1 2) and 64 (the length of `n%8` in eighth),
+which is 192 eighth or 24 bars or **48 seconds**. However, because
+the note set selection sequence (2nd 1st 1st 1st) repeats every
+32 seconds or 128 eighth, the third voice has a period of lcm(192,128)
+= 384 eights or 48 bars or **96 seconds**. Here is the beginning of
+the sequence (`i'` is `(i>>11)%3` and `+` is addition modulo 8):
 
 ```text
-seq%8:  |: 0 1 2 3 :|: 1 2 3 4 :|: 2 3 4 5 :|: 3 4 5 6 :   
-         : 4 5 6 7 :|: 5 6 7 0 :|: 6 7 0 1 :|: 7 0 1 2 :|  (16 secs)
+M  2-----------------------------------------------------------------
+n  0 . . . . . . .  1 . . . . . . .  2 . . . . . . .  3 . . . . . . .
+i' 0 1 2 0 1 2 0 1  2 0 1 2 0 1 2 0  1 2 0 1 2 0 1 2  0 1 2 0 1 2 0 1
++  0 1 2 0 1 2 0 1  3 1 2 3 1 2 3 1  3 4 2 3 4 2 3 4  3 4 5 3 4 5 3 4
+   G b C'G b C'G b  e b C'e b C'e b  e b C'e b C'e b  e b G e b G e b
+
+M  1-----------------------------------------------------------------
+n  4 . . . . . . .  5 . . . . . . .  6 . . . . . . .  7 . . . . . . .
+i' 2 0 1 2 0 1 2 0  1 2 0 1 2 0 1 2  0 1 2 0 1 2 0 1  2 0 1 2 0 1 2 0
++  6 4 5 6 4 5 6 4  6 7 5 6 7 5 6 7  6 7 0 6 7 0 6 7  1 7 0 1 7 0 1 7
+   e a F e a F e a  e C F e C F e C  e C F e C F e C  a C F a C F a C
+
+M  1-----------------------------------------------------------------
+n  8 . . . . . . .  9 . . . . . . .  10. . . . . . .  11. . . . . . .
+i' 1 2 0 1 2 0 1 2  0 1 2 0 1 2 0 1  2 0 1 2 0 1 2 0  1 2 0 1 2 0 1 2
++  1 2 0 1 2 0 1 2  1 2 3 1 2 3 1 2  4 2 3 4 2 3 4 2  4 5 3 4 5 3 4 5
+
+M  1-----------------------------------------------------------------
+n  12. . . . . . .  13. . . . . . .  14. . . . . . .  15. . . . . . .
+i' 0 1 2 0 1 2 0 1  2 0 1 2 0 1 2 0  1 2 0 1 2 0 1 2  0 1 2 0 1 2 0 1
++  4 5 6 4 5 6 4 5  7 5 6 7 5 6 7 5  7 0 6 7 0 6 7 0  7 0 1 7 0 1 7 0
 ```
 
-As for all voices, the notes are drawn from the `"Qj..."` set
-for the first 8 seconds, then from the `"BY..."` set for 24 seconds,
-before the process repeats.
+And this is the complete 3rd voice:
 
-The **fourth voice** is controlled by `8+n-((i>>10)%3)`, which
+![Third Voice](doc/voice3.png)
+
+### Fourth Voice
+
+The fourth voice is controlled by `8+n-((i>>10)%3)`, which
 changes about 8 times a second, so it is in sixteenth relative
 to the first voice. It starts after about 1'20" when *s/5* first
 changes from 0 to 1.
 
-`n-((i>>10)%3)` generates the sequence
-0 -1 -2 -3 : 1 0 -1 -2 : 2 1 0 -1 : 3 2 1 0 : ...
-(where each part is repeated 4 times because `i>>10`
-increments 4 times as fast as does `n`).
-By adding 8 the negative numbers are avoided (and we start later
-in the repeating sequence). After the mod 8 we find the sequence
-below; because of the two note sets it repeates only after 32 seconds.
+`(i>>10)%3)` generates the repeating sequence 0 1 2.
+`i>>10` increments 4 times as fast as does `n`, so
+`n-((i>>10)%3)` generates the sequence .........
+Adding 8 avoids negative numbers (and we start later
+in the repeating sequence).
+After the mod 8 we find the sequence .........
 
 ```text
-seq%8:  |: 0 7 6 5 :|: 1 0 7 6 :|: 2 1 0 7 :|: 3 2 1 0 :
-         : 4 3 2 1 :|: 5 4 3 2 :|: 6 5 4 3 :|: 7 6 5 4 :|  (16 secs)
+    0  1  2  3     4  5  6  7
+1:  F  Ab C' Eb    Ab F  Eb C
+2:  G  Bb C' Eb    Bb G  Eb C
 ```
-
-[graycode]: https://en.wikipedia.org/wiki/Gray_code
 
 ## Open Issues
 

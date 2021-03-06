@@ -1,0 +1,7 @@
+*.dvi
+*.log
+*.mps
+*.mpx
+mpxerr.tex
+*.midi
+voice?.pdf
