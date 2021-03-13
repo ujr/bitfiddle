@@ -18,7 +18,7 @@
 \header {
   title = "Bitshift Variations in C Minor"
   composer = "Rob Miles 2016"
-  subtitle = "excerpt • heavy bar marks note set change"
+  subtitle = "excerpt • heavy bar lines mark note set changes"
   tagline = ##f
   pdfauthor = "Rob Miles 2016"
   pdfsubject  = "Analysis by UJR"
