@@ -2,14 +2,26 @@
 VOICESPDF = voice1.pdf voice2.pdf voice3.pdf voice4.pdf
 VOICESPNG = voice1.png voice2.png voice3.png voice4.png
 
-all: bitfiddle pngs
-pngs: $(VOICESPNG)
+all: bitfiddle notesets score pngs
+pngs: $(VOICESPNG) notesets.png score.png
 
 bitfiddle: bitfiddle.pdf
 bitfiddle.pdf: bitfiddle.tex bitfiddle.mp $(VOICESPDF)
 	mpost bitfiddle
 	tex bitfiddle
 	dvipdfm bitfiddle
+
+score: score.pdf score.png
+score.pdf: score.ly
+	lilypond --pdf score.ly
+score.png: score.ly
+	lilypond --png score.ly
+
+notesets: notesets.pdf notesets.png
+notesets.pdf: notesets.ly
+	lilypond -fpdf notesets.ly
+notesets.png: notesets.ly
+	lilypond -fpng notesets.ly
 
 voice1.pdf: voice1.ly
 	lilypond -fpdf voice1.ly

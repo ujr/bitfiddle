@@ -277,7 +277,7 @@ Recall the PCM generator with its four parameters
 g(i,x,t,o){
   char *m = 3&(i>>16)?"BY}6YB6%":"Qj}6jQ6%"; // melodic material
   int n = m[t%8] + 51;                 // note (pitch indicator)
-  return (3 & x & (i*n >> o)) << 4;    // amplitude at time i
+  return (3 & x & (i*n >> o)) << 4;    // deflection at time i
 }
 ```
 
@@ -293,8 +293,8 @@ Zero (false) maps to the second set, whereas 1 2 3 (all true) map to
 the first set. Both sets have 8 notes and are indexed by `t%8`
 so that values t≥8 wrap around.
 
-Therefore, we get notes for 8 seconds from the second set,
-then notes for 24 seconds from the first set.
+Therefore, we get notes from the second set for 8 seconds,
+then notes from the first set for 24 seconds.
 
 The main function, after some refactoring, looks like this:
 
@@ -592,6 +592,11 @@ a *fascinating* synthesis: *Bitshift Variations in C Minor*
 by Rob Miles (2016).
 
 ## Appendix
+
+### Score Exceprt
+
+This is how *Bitshift Variations in C Minor* “look like” (excerpt):
+[![Score Excerpt](doc/score.png)](doc/score.pdf)
 
 ### Times
 
