@@ -293,6 +293,9 @@ Zero (false) maps to the second set, whereas 1 2 3 (all true) map to
 the first set. Both sets have 8 notes and are indexed by `t%8`
 so that values t≥8 wrap around.
 
+Therefore, we get notes for 8 seconds from the second set,
+then notes for 24 seconds from the first set.
+
 The main function, after some refactoring, looks like this:
 
 ```C
@@ -553,10 +556,27 @@ the code.
 
 ## Harmony
 
-We looked at the voices separately;
-how do they play together? **TODO**
+Looking at the two sets of notes, we find that each contains
+the notes of a minor seventh chord:
+
+- `"BY..."` consists of F A♭ C E♭ or Fm<sup>7</sup>
+- `"Qj..."` consists of C E♭ G B♭ or Cm<sup>7</sup>
+
+Shared between the two sets are C and E♭, the D is missing from both.
+
+[![Note sets](doc/notesets.png)](doc/notesets.pdf)
+
+In this view, the *Bitshift Variations* boil down to 8 seconds
+of Cm<sup>7</sup> jingling followed by 24 seconds of Fm<sup>7</sup>
+jingling. The dissonant intervals can and do occur, but
+will be softened by other voices that tend to “fill” the
+minor seventh chord.
 
 ## Closing Remarks
+
+The music generated is not super complex, but quite effective.
+Knowing how little code it takes to generate both the music
+and the sound—this makes it so astonishing.
 
 Remember, this was all integer arithmetics, no floating point.
 Much of the terseness derives from exploiting C's operator

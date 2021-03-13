@@ -15,6 +15,10 @@ understand the magic.
 - Handout: [doc/bitfiddle.pdf](doc/bitfiddle.pdf)
 - Slides: [slides/index.html](slides/index.html) (not in public repo)
 
+The materials here are available under a
+[CC BY-SA](http://creativecommons.org/licenses/by-sa/4.0/)
+license.
+
 ## Sources
 
 - Original code: <http://txti.es/bitshiftvariationsincminor>

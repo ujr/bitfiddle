@@ -53,8 +53,8 @@ EOT
 cat << EOT | gcc -xc - && ./a.out | aplay -r 8192 -f U8
 g(i,x,t,o){
   char *m = 3&(i>>16)?"BY}6YB6%":"Qj}6jQ6%"; // melodic material
-  int n = m[t%8] + 51;                 // note (pitch indicator)
-  return (3 & x & (i*n >> o)) << 4;    // amplitude at time i
+  int n = m[t%8] + 51;                // note (pitch indicator)
+  return (3 & x & (i*n >> o)) << 4;   // signal at time i
 }
 main(i,n,s){
   for(i=0;;i++){
