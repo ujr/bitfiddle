@@ -99,7 +99,7 @@ melodyThree = \fixed g' {
 }
 
 melodyFour = \fixed g'' {
-  \clef "treble^8" \key c \minor \time 4/4
+  \clef "treble" \key c \minor \time 4/4
   g16 c   ees g   c   ees g   c     ees g   c   ees g   c   ees g   
   g   c   bes g   c   bes g   c     bes g   c   bes g   c   bes g   
   g   c'  bes g   c'  bes g   c'    bes g   c'  bes g   c'  bes g   
@@ -168,5 +168,5 @@ melodyFour = \fixed g'' {
   \midi { \tempo 4 = 120 }
 }
 
-\markup { "etc." }
+\markup { \italic "etc." }
 

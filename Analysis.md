@@ -12,6 +12,7 @@ An analysis of Rob Miles's 2016
 - [The Period](#the-period)
 - [Harmony](#harmony)
 - [Closing Remarks](#closing-remarks)
+- [Appendix](#appendix)
 
 ## Introduction
 
@@ -26,7 +27,7 @@ t%8]+51)>>o))<<4);};main(i,n,s){for(i=0;;i++)putchar(g(i,1,n=i>>14,12
 10)%3),9));}"|gcc -xc -&&./a.out|aplay
 ```
 
-Paste this into a terminal on your Linux system and listen.
+Paste this code into a terminal on your Linux system and listen.
 Or listen to the [recording at SoundCloud][sound].
 It starts with one slow-moving voice. A second, faster voice enters.
 Then a third and even a fourth voice! It has the mechanical charms
@@ -39,6 +40,7 @@ It is **magical**. Absolutely **fascinating**.
 And it prompts investigation. The author, Rob Miles, explains
 his feat partially in a [YouTube movie][intro]. This article
 goes into the details and provides some background.
+A [one page overview](doc/bitfiddle.pdf) may accompany the present analysis.
 
 [intro]: https://www.youtube.com/watch?v=MqZgoNRERY8
 [code]: http://txti.es/bitshiftvariationsincminor
@@ -80,18 +82,15 @@ Stretch out the terse C code a bit, so it looks like this:
 ```sh
 cat << EOT | gcc -xc - && ./a.out | aplay
 g(i,x,t,o){
-  return (3&x&(i*((3&i>>16?\"BY}6YB6%\":\"Qj}6jQ6%\")[t%8]+51)>>o))<<4;
+  return (3&x&(i*((3&i>>16?"BY}6YB6%":"Qj}6jQ6%")[t%8]+51)>>o))<<4;
 }
 main(i,n,s){
   for(i=0;;i++)
     putchar(
       g(i, 1,       n=i>>14,        12)
-      +
-      g(i, s=i>>17, n^i>>13,        10)
-      +
-      g(i, s/3,     n+((i>>11)%3),  10)
-      +
-      g(i, s/5,     8+n-((i>>10)%3), 9)
+    + g(i, s=i>>17, n^i>>13,        10)
+    + g(i, s/3,     n+((i>>11)%3),  10)
+    + g(i, s/5,     8+n-((i>>10)%3), 9)
     );
 }
 EOT
@@ -140,19 +139,19 @@ so that `63&i<<2` means `63 & (i<<2)`.
 (1) Two octaves higher (`i<<2` or 4 times the frequency):
 
 ```C
-main(i) { for (i=0;;i++) putchar(i<<2); }  /* 0 to 252 in steps of 4 */
+main(i){ for(i=0;;i++) putchar(i<<2); }  /* 0 to 252 in steps of 4 */
 ```
 
 (2) Same frequency, lower amplitude:
 
 ```C
-main(i) { for (i=0;;i++) putchar(63&i); }  /* 0..63 in steps of 1 */
+main(i){ for(i=0;;i++) putchar(63&i); }  /* 0..63 in steps of 1 */
 ```
 
 (3) Amplify to original amplitude:
 
 ```C
-main(i) { for (i=0;;i++) putchar((63&i)<<2); }  /* 0 to 252 in steps of 4 */
+main(i){ for(i=0;;i++) putchar((63&i)<<2); }  /* 0 to 252 in steps of 4 */
 ```
 
 (4) Make the sawtooth curve more staircase shaped: `i>>1` grows at
@@ -160,7 +159,7 @@ half the speed of `i`, so it takes two steps of `i` until anything
 can change. The result is the sequence 0 0 8 8 16 16 .. 248 248:
 
 ```C
-main(i) { for (i=0;;i++) putchar((31&i>>1)<<3); }  /* 0 0 8 8 16 16 .. 248 248 */
+main(i){ for(i=0;;i++) putchar((31&i>>1)<<3); }  /* 0 0 8 8 16 16 .. 248 248 */
 ```
 
 (5) Taking the staircase to the extreme: with `i>>4` (`i` div 16) it
@@ -169,7 +168,7 @@ with 3 wraps around at multiples of 4, so to keep amplitude (volume)
 we multiply with 64 (or left shifting by 6):
 
 ```C
-main(i) { for (i=0;;i++) putchar((3&i>>4)<<6); }  /* 0:16 64:16 128:16 192:16 */
+main(i){ for(i=0;;i++) putchar((3&i>>4)<<6); }  /* 0:16 64:16 128:16 192:16 */
 ```
 
 Two key things to note from the examples above:
@@ -199,14 +198,14 @@ but instead multiply by 3 and divide by 2 (by right shifting).
 (6) Let's say this plays a C:
 
 ```C
-main(i) { for (i=0;;i++) putchar((3&(i>>3))<<6); }
+main(i){ for(i=0;;i++) putchar((3&(i>>3))<<6); }
 ```
 
 (7) Then this plays a G because it is at 3/2 of the frequence
 of example (6); we divide by two by shifting right one more:
 
 ```C
-main(i) { for (i=0;;i++) putchar((3&(i*3>>4))<<6); }
+main(i){ for(i=0;;i++) putchar((3&(i*3>>4))<<6); }
 ```
 
 (8) We arrive at this overall structure of a simple PCM sound
@@ -214,7 +213,7 @@ generator, where *n* is the note (pitch), *o* the octave, and
 *v* the volume:
 
 ```C
-for (i=0;;i++) putchar( (3 & (i*n >> o)) << v );
+for(i=0;;i++) putchar( (3 & (i*n >> o)) << v );
 ```
 
 And indeed this is exactly what we can find in Rob Miles's
@@ -227,7 +226,7 @@ very structure in Rob Miles's code:
 g(i,x,t,o){
   char *m = 3&(i>>16)?"BY}6YB6%":"Qj}6jQ6%"; // melodic material
   int n = m[t%8] + 51;                 // note (pitch indicator)
-  return (3 & x & (i*n >> o)) << 4;    // amplitude at time i
+  return (3 & x & (i*n >> o)) << 4;    // deflection at time i
 }
 ```
 
@@ -250,7 +249,7 @@ ASCII |  37 |  54  |  66  |  81  |  89  | 106  | 125 |
   +51 |  88 | 105  | 117  | 132  | 140  | 157  | 176 |
 Ratio |  1  | 1.19 | 1.32 | 1.50 | 1.59 | 1.78 |  2  |
       | 1/1 | 6/5  | 4/3  | 3/2  | 8/5  | 16/9 | 2/1 | (just intonation)
- Note |  C  |  Eb  |  F   |  G   |  Ab  |  Bb  |  C' | (C minor)
+ Note |  C  |  E♭  |  F   |  G   |  A♭  |  B♭  |  C' | (C minor)
 ```
 
 We find that, when 51 is added to the ASCII values of the characters
@@ -326,9 +325,9 @@ the 2nd half of the 1st set, then the entire 1st set, before
 the melody repeats:
 
 ```text
-seq%8:  |: 0 1  2  3  : 4  5 6  7 : 0 1  2  3  : 4  5 6  7 :|
-  set:     ----2nd---   ---1st---   ---1st----   ---1st---
-notes:  |: G B♭ C' E♭ : A♭ F E♭ C : F A♭ C' E♭ : A♭ F E♭ C :|
+seq%8:  | 0  1  2  3  : 4  5  6  7  : 0  1  2  3  : 4  5  6  7  |
+  set:  | ----2nd---- : ----1st---- : ----1st---- : ----1st---- |
+notes:  | G  B♭ C' E♭ : A♭ F  E♭ C  : F  A♭ C' E♭ : A♭ F  E♭ C  |
 ```
 
 ![First Voice](doc/voice1.png)
@@ -390,9 +389,9 @@ a period of **32 seconds**. Again, the heavy bar line
 marks the change between the note sets.
 
 ```text
-seq%8:  |: 0  1  3  2  6  7  5  4  : 4  5  7  6  2  3  1  0 :|
-notes:  |: G  B♭ E♭ C' E♭ C  G  B♭ : A♭ F  C  E♭ C' E♭ A♭ F :
-           F  A♭ E♭ C' E♭ C  F  A♭ : A♭ F  C  E♭ C' E♭ A♭ F :|
+seq%8:  | 0  1  3  2  6  7  5  4  : 4  5  7  6  2  3  1  0 |
+notes:  | G  B♭ E♭ C' E♭ C  G  B♭ : A♭ F  C  E♭ C' E♭ A♭ F :
+          F  A♭ E♭ C' E♭ C  F  A♭ : A♭ F  C  E♭ C' E♭ A♭ F |
 ```
 
 ![Second Voice](doc/voice2.png)
@@ -535,18 +534,18 @@ Periods of the melodies have been indicated before.
 In combination with voice variation we get these results:
 
 - Voice 1: melodic period is 32 seconds, voice does not
-  vary, so we get an overall period of **32 seconds**.
+  vary, so we get an overall period of 32 seconds.
 
 - Voice 2: melodic period is 32 seconds, voice variation
-  period is 4×16 seconds, overall period is **64 seconds**.
+  period is 4×16 seconds, overall period is 64 seconds.
 
 - Voice 3: melodic period is 96 seconds, voice variation
   period is 4×48 or 192 seconds, overall period is
-  **192 seconds**.
+  192 seconds.
 
 - Voice 4: melodic period is 96 seconds, voice variation
   is 4×80 or 320 seconds. The least common multiple yields
-  an overall period of **960 seconds**.
+  an overall period of 960 seconds.
 
 The **overall period** of the piece is **960 seconds**
 or **16 minutes** or 30 times the baseline (voice 1) or
@@ -574,10 +573,6 @@ minor seventh chord.
 
 ## Closing Remarks
 
-The music generated is not super complex, but quite effective.
-Knowing how little code it takes to generate both the music
-and the sound—this makes it so astonishing.
-
 Remember, this was all integer arithmetics, no floating point.
 Much of the terseness derives from exploiting C's operator
 precedence rules by omitting needless parentheses. Indeed,
@@ -585,6 +580,9 @@ two more parens and one semicolon could be omitted, sparing
 another two (sic) bytes. The arguments to main are really
 just local variables declared using as little code as possible.
 
+The music generated is not super complex, but quite effective.
+Knowing how little code it takes to generate both the music
+and the sound—this makes it so astonishing.
 Valentino Braitenberg coined the “law of downhill synthesis
 and uphill analysis” in his 1986 book *Vehicles*. Does it
 always hold? I found this article to be a *fun* analysis of
@@ -596,6 +594,7 @@ by Rob Miles (2016).
 ### Score Exceprt
 
 This is how *Bitshift Variations in C Minor* “look like” (excerpt):
+
 [![Score Excerpt](doc/score.png)](doc/score.pdf)
 
 ### Times
@@ -606,29 +605,30 @@ sampling rate of the **aplay** tool. Since this is about
 and corresponding frequencies and note values:
 
 ```text
-    Divisor        Frequency             Note Value
-i>>10    i/1024    8 times per second    sixteenth
-i>>11    i/2048    4 times per second    eighth
-i>>12    i/4096    2 times per second
-i>>13    i/8192    once per second       half
-i>>14   i/16384    two seconds           whole
-i>>15   i/32768   
-i>>16   i/65536
-i>>17  i/131072    16 seconds
+    Divisor         Frequency             Note Value
+i>>10 ≡   i/1024    8 times per second    sixteenth
+i>>11 ≡   i/2048    4 times per second    eighth
+i>>12 ≡   i/4096    2 times per second
+i>>13 ≡   i/8192    once per second       half
+i>>14 ≡  i/16384    two seconds           whole
+i>>15 ≡  i/32768   
+i>>16 ≡  i/65536
+i>>17 ≡ i/131072    16 seconds
 ```
 
 ### Notes on C
 
 The default type is `int`, both for parameters and function
 return values. Therefore, `main(i)` is short for `int main(i)`,
-and similarly for `g(i,x,t,o)`.
+and similarly for `g(i,x,t,o)`, which has four parameters of
+type `int` and returns an `int`.
 
 Bitshift variations in C minor uses the following C operators,
-which appear hear ordered form highest precedence (tightest
+which appear here ordered form highest precedence (tightest
 binding) to least:
 
 ```text
-   [ ]        index
+   [ ]        indexing
  *  /  %      multiplicative
   +   -       additive
  <<   >>      bitshift
