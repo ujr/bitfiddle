@@ -24,3 +24,20 @@ license.
 - Original code: <http://txti.es/bitshiftvariationsincminor>
 - Intro movie: <https://www.youtube.com/watch?v=MqZgoNRERY8>
 - Recording: <https://soundcloud.com/robertskmiles/bitshift-variations-in-c-minor>
+
+## Update January 2025
+
+I came to know that generated sound as the one analyzed
+above is known as *bytebeat* and is seen as a kind of
+*low-complexity art*. Below are a few entry points.
+Rob Miles's *Bitshift Variations* are, in my opinion,
+in a somewhat higher league than the samples linked
+from the sites below.
+
+- *Discovering novel computer music techniques...* is a short
+  paper by Ville-Matias Heikkilä (an early bytebeat composer)
+  at <http://arxiv.org/abs/1112.1368>
+- The site <http://canonical.org/~kragen/bytebeat/> compiles
+  bytebeat-related links (including to the paper above)
+- [Low-complexity art](https://en.wikipedia.org/wiki/Low-complexity_art)
+  article at Wikipedia
